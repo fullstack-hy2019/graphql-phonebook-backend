@@ -55,6 +55,10 @@ const typeDefs = gql`
       street: String!
       city: String!
     ): Person
+    editNumber(
+      id: ID!
+      phone: String!
+    ): Person    
   }
 `
 
@@ -93,8 +97,18 @@ const resolvers = {
       const person = { ...args, id: uuid() }
       persons = persons.concat(person)
       return person
-    }
-  }
+    },
+    editNumber: (root, args) => {
+      const person = persons.find(p => p.id === args.id)
+      if (!person) {
+        return null
+      }
+
+      const updatedPerson = { ...person, phone: args.phone }
+      persons = persons.map(p => p.id === args.id ? updatedPerson : p)
+      return updatedPerson
+    }    
+  },
 }
 
 const server = new ApolloServer({
