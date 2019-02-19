@@ -1,6 +1,7 @@
 const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const uuid = require('uuid/v1')
 
-const persons = [
+let persons = [
   {
     name: "Arto Hellas",
     phone: "040-123543",
@@ -56,7 +57,8 @@ const resolvers = {
   Query: {
     personCount: () => persons.length,
     allPersons: () => persons,
-    findPerson: (root, args) => persons.find(p => p.name === args.name)
+    findPerson: (root, args) =>
+      persons.find(p => p.name === args.name)
   },
   Person: {
     address: (root) => {
@@ -74,8 +76,8 @@ const resolvers = {
         })
       }
 
-      const person = { ...args }
-      persons.push(person)
+      const person = { ...args, id: uuid() }
+      persons = persons.concat(person)
       return person
     }
   }
