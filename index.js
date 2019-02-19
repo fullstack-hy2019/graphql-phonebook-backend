@@ -54,11 +54,11 @@ const typeDefs = gql`
       phone: String
       street: String!
       city: String!
-    ): Person
+    ): Person  
     editNumber(
-      id: ID!
+      name: String!
       phone: String!
-    ): Person    
+    ): Person        
   }
 `
 
@@ -99,15 +99,15 @@ const resolvers = {
       return person
     },
     editNumber: (root, args) => {
-      const person = persons.find(p => p.id === args.id)
+      const person = persons.find(p => p.name === args.name)
       if (!person) {
         return null
       }
 
       const updatedPerson = { ...person, phone: args.phone }
-      persons = persons.map(p => p.id === args.id ? updatedPerson : p)
+      persons = persons.map(p => p.name === args.name ? updatedPerson : p)
       return updatedPerson
-    }    
+    }           
   },
 }
 
