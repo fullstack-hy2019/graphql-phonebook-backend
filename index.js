@@ -123,7 +123,7 @@ const resolvers = {
 
       return person
     },  
-    editNumber: async (root, { currentUser }) => {
+    editNumber: async (root, args, {currentUser}) => {
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
       }
@@ -191,12 +191,15 @@ const server = new ApolloServer({
   resolvers,
   context: async ({ req }) => {
     const authorization = req.headers.authorization
+     
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+      console.log('JEES')
       const decodedToken = jwt.verify(authorization.substring(7), JWT_SECRET)
       
       const currentUser = await User
         .findById(decodedToken.id)
         .populate('friends')
+
       return { currentUser }
     }
   }
