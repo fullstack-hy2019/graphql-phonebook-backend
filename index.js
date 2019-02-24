@@ -190,10 +190,9 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: async ({ req }) => {
-    const authorization = req.headers.authorization
+     const authorization = req ? req.headers.authorization : null
      
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-      console.log('JEES')
       const decodedToken = jwt.verify(authorization.substring(7), JWT_SECRET)
       
       const currentUser = await User
