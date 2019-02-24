@@ -1,8 +1,10 @@
-const { ApolloServer, UserInputError, AuthenticationError, gql } = require('apollo-server')
+const { ApolloServer, UserInputError, AuthenticationError, gql, PubSub } = require('apollo-server')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 const Person = require('./models/person')
 const User = require('./models/user')
+
+const pubsub = new PubSub()
 
 mongoose.set('useFindAndModify', false)
 
@@ -73,8 +75,12 @@ const typeDefs = gql`
     login(
       username: String!
       password: String!      
-    ): Token  
+    ): Token    
   }
+
+  type Subscription {
+    personAdded: Person!
+  }    
 `
 
 const JWT_SECRET = 'NEED_HERE_A_SECRET_KEY'
@@ -120,6 +126,8 @@ const resolvers = {
           invalidArgs: args,
         })
       }
+
+      pubsub.publish('PERSON_ADDED', { personAdded: args })
 
       return person
     },  
@@ -183,17 +191,21 @@ const resolvers = {
       return { value: jwt.sign(userForToken, JWT_SECRET) }
     },              
   },
-  
+  Subscription: {
+    personAdded: {
+      subscribe: () => pubsub.asyncIterator(['PERSON_ADDED'])
+    },
+  },
 }
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: async ({ req }) => {
-    const authorization = req.headers.authorization
-     
+
+    const authorization = req ? req.headers.authorization : null
+
     if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-      console.log('JEES')
       const decodedToken = jwt.verify(authorization.substring(7), JWT_SECRET)
       
       const currentUser = await User
