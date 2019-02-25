@@ -141,9 +141,8 @@ const resolvers = {
       return person
     },   
     addAsFriend: async (root, args, { currentUser }) => {
-      const nonFriendAlready = (person) => {
+      const nonFriendAlready = (person) =>
         !currentUser.friends.map(f => f._id).includes(person._id)
-      }
 
       if (!currentUser) {
         throw new AuthenticationError("not authenticated")
